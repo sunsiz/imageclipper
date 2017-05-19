@@ -1,18 +1,18 @@
 /** @file */
 /* The MIT License
- * 
+ *
  * Copyright (c) 2008, Naotoshi Seo <sonots(at)gmail.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,7 +62,7 @@ typedef struct CvCallbackParam {
     vector<string> imtypes;    /**< image file types */
     const char* output_format; /**< output filename format */
     int inc;                   /**< incremental speed via keyboard operations */
-    // rectangle region 
+    // rectangle region
     CvRect rect;               /**< rectangle parameter to be shown */
     int rotate;                /**< rotation angle */
     CvPoint shear;             /**< shear deformation */
@@ -74,10 +74,10 @@ typedef struct CvCallbackParam {
     vector<string>::iterator fileiter;  /**< iterator */
     CvCapture* cap;                     /**< video reading */
     int frame;                          /**< iterator */
-	CvSize screen_size;								// Cache - screen resolution
-	IplImage* img_display;							// Cache - Current image pointer
-	float scale_factor;								// Cache - global scale factor
-	float cap_scale_factor;							// Cache - scale factor of capture
+    CvSize screen_size;								// Cache - screen resolution
+    IplImage* img_display;							// Cache - Current image pointer
+    float scale_factor;								// Cache - global scale factor
+    float cap_scale_factor;							// Cache - scale factor of capture
 } CvCallbackParam ;
 
 /**
@@ -121,36 +121,36 @@ int main( int argc, char *argv[] )
         vector<string>::iterator(),
         NULL,
         0,
-		
-		
-		cvSize(0, 0),
-		NULL,
-		1.0f,		// global scale factor
-		2.0f		// scale factor of capture
+
+
+        cvSize(0, 0),
+        NULL,
+        1.0f,		// global scale factor
+        2.0f		// scale factor of capture
     };
     {
-		init_param.imtypes.push_back( "bmp" );
-		init_param.imtypes.push_back( "dib" );
-		init_param.imtypes.push_back( "jpeg" );
-		init_param.imtypes.push_back( "jpg" );
-		init_param.imtypes.push_back( "jpe" );
-		init_param.imtypes.push_back( "png" );
-		init_param.imtypes.push_back( "pbm" );
-		init_param.imtypes.push_back( "pbm" );
-		init_param.imtypes.push_back( "ppm" );
-		init_param.imtypes.push_back( "sr" );
-		init_param.imtypes.push_back( "ras" );
-		init_param.imtypes.push_back( "tiff" );
-		init_param.imtypes.push_back( "exr" );
-		init_param.imtypes.push_back( "jp2" );
-	}
+        init_param.imtypes.push_back( "bmp" );
+        init_param.imtypes.push_back( "dib" );
+        init_param.imtypes.push_back( "jpeg" );
+        init_param.imtypes.push_back( "jpg" );
+        init_param.imtypes.push_back( "jpe" );
+        init_param.imtypes.push_back( "png" );
+        init_param.imtypes.push_back( "pbm" );
+        init_param.imtypes.push_back( "pbm" );
+        init_param.imtypes.push_back( "ppm" );
+        init_param.imtypes.push_back( "sr" );
+        init_param.imtypes.push_back( "ras" );
+        init_param.imtypes.push_back( "tiff" );
+        init_param.imtypes.push_back( "exr" );
+        init_param.imtypes.push_back( "jp2" );
+    }
     CvCallbackParam* param = &init_param;
 
     ArgParam init_arg = {
         argv[0],
         ".",
-        "%d/imageclipper/%i.%e_%04r_%04x_%04y_%04w_%04h.png",
-        "%d/imageclipper/%i.%e_%04f_%04r_%04x_%04y_%04w_%04h.png",
+        "%d/image_clipper/%i.%e_%04r_%04x_%04y_%04w_%04h.png",
+        "%d/image_clipper/%i.%e_%04f_%04r_%04x_%04y_%04w_%04h.png",
         NULL,
         1
     };
@@ -178,8 +178,8 @@ void load_reference( const ArgParam* arg, CvCallbackParam* param )
     bool is_directory   = fs::is_directory( arg->reference );
     bool is_image = fs::match_extensions( arg->reference, param->imtypes );
     bool is_video = !is_directory & !is_image;
-    param->output_format = ( arg->output_format != NULL ? arg->output_format : 
-        ( is_video ? arg->vidout_format : arg->imgout_format ) );
+    param->output_format = ( arg->output_format != NULL ? arg->output_format :
+                                                          ( is_video ? arg->vidout_format : arg->imgout_format ) );
     param->frame = arg->frame;
 
     if( is_directory || is_image )
@@ -194,6 +194,7 @@ void load_reference( const ArgParam* arg, CvCallbackParam* param )
                 usage( arg );
                 exit(1);
             }
+            sort(param->filelist.begin(),param->filelist.end());
             param->fileiter = param->filelist.begin();
         }
         else
@@ -249,25 +250,25 @@ void load_reference( const ArgParam* arg, CvCallbackParam* param )
     }
 
     // get screen resolution
-    #ifdef WIN32
-        param->screen_size.width = GetSystemMetrics(SM_CXSCREEN);
-        param->screen_size.height = GetSystemMetrics(SM_CYSCREEN);
-    #else
-        param->screen_size.width = 1366;
-        param->screen_size.height = 768;
-    #endif // WIN32
+#ifdef WIN32
+    param->screen_size.width = GetSystemMetrics(SM_CXSCREEN);
+    param->screen_size.height = GetSystemMetrics(SM_CYSCREEN);
+#else
+    param->screen_size.width = 1366;
+    param->screen_size.height = 768;
+#endif // WIN32
 
-        // resize image to fit screen resolution
-        {
-            CvSize _size = cvSize(param->img_src->width, param->img_src->height);
-            while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
-                _size.width /= 2;
-                _size.height /= 2;
-                param->scale_factor /= 2;
-            }
-            param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
-            cvResize(param->img_src, param->img_display);
+    // resize image to fit screen resolution
+    {
+        CvSize _size = cvSize(param->img_src->width, param->img_src->height);
+        while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+            _size.width /= 2;
+            _size.height /= 2;
+            param->scale_factor /= 2;
         }
+        param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
+        cvResize(param->img_src, param->img_display);
+    }
 }
 
 /**
@@ -277,39 +278,73 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
 {
     string filename = param->cap == NULL ? *param->fileiter : arg->reference;
 
-    cvShowCroppedImage( param->miniw_name, param->img_src, 
-        cvRect32fFromRect( param->rect, param->rotate ), 
-        cvPointTo32f( param->shear ) );
-    cvShowImageAndRectangle( param->w_name, param->img_display, 
-        cvRect32fFromRect( param->rect, param->rotate ), 
-        cvPointTo32f( param->shear ) );
+    param->scale_factor=1.0f;
+    CvSize _size = cvSize(param->img_src->width, param->img_src->height);
+    if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+        _size.width /= 2;
+        _size.height /= 2;
+        param->scale_factor /= 2;
+    }else{
+        param->scale_factor=1.0f;
+    }
+    cout<<"Scale factorchanged to "<<param->scale_factor<<endl;
+    cvReleaseImage(&param->img_display);
+    param->img_display = cvCreateImage(
+                cvSize(param->img_src->width * param->scale_factor, param->img_src->height * param->scale_factor),
+                param->img_src->depth, param->img_src->nChannels);
+    cvResize(param->img_src, param->img_display);
+    cvShowImageAndRectangle(param->w_name, param->img_display, cvRect32fFromRect(param->rect, param->rotate), cvPointTo32f(param->shear));
+
+    if(param->scale_factor!=1.0f){
+        cvShowCroppedImage( param->miniw_name, param->img_src,
+                            cvRect32f(param->rect.x*(1/param->scale_factor),param->rect.y*(1/param->scale_factor),param->rect.width*(1/param->scale_factor),param->rect.height*(1/param->scale_factor), param->rotate ),
+                            cvPointTo32f( param->shear ) );
+        cout<<"Scale factor is "<<param->scale_factor<<", Scaled crop image size is "<<param->rect.x*(1/param->scale_factor)<<", "<<param->rect.y*(1/param->scale_factor)<<", "<<param->rect.width*(1/param->scale_factor)<<", "<<param->rect.height*(1/param->scale_factor)<<endl;
+    }else{
+        cvShowCroppedImage( param->miniw_name, param->img_src,
+                            cvRect32fFromRect( param->rect, param->rotate ),
+                            cvPointTo32f( param->shear ) );
+        cout<<"Scale factor is "<<param->scale_factor<<", Unscaled crop image size is "<<param->rect.x<<", "<<param->rect.y<<", "<<param->rect.width<<", "<<param->rect.height<<endl;
+    }
+    cvShowImageAndRectangle( param->w_name, param->img_display,
+                             cvRect32fFromRect( param->rect, param->rotate ),
+                             cvPointTo32f( param->shear ) );
+
+    //    cvShowCroppedImage( param->miniw_name, param->img_src,
+    //        cvRect32fFromRect( param->rect, param->rotate ),
+    //        cvPointTo32f( param->shear ) );
+    //    cvShowImageAndRectangle( param->w_name, param->img_display,
+    //        cvRect32fFromRect( param->rect, param->rotate ),
+    //        cvPointTo32f( param->shear ) );
 
     while( true ) // key callback
     {
         char key = cvWaitKey( 0 );
-		cout << "Key pressed: " << (int)key << endl;
+        cout << "Key pressed: " << (int)key << endl;
 
-		if (key == '+') {
-			param->scale_factor *= 1.05;
+        if (key == '+') {
+            param->scale_factor *= 1.05;
 
-			cvReleaseImage(&param->img_display);
-			param->img_display = cvCreateImage(
-				cvSize(param->img_src->width * param->scale_factor, param->img_src->height * param->scale_factor),
-				param->img_src->depth, param->img_src->nChannels);
-			cvResize(param->img_src, param->img_display);
-			cvShowImageAndRectangle(param->w_name, param->img_display, cvRect32fFromRect(param->rect, param->rotate), cvPointTo32f(param->shear));
-		}
+            cout<<"Scale factorchanged to "<<param->scale_factor<<endl;
+            cvReleaseImage(&param->img_display);
+            param->img_display = cvCreateImage(
+                        cvSize(param->img_src->width * param->scale_factor, param->img_src->height * param->scale_factor),
+                        param->img_src->depth, param->img_src->nChannels);
+            cvResize(param->img_src, param->img_display);
+            cvShowImageAndRectangle(param->w_name, param->img_display, cvRect32fFromRect(param->rect, param->rotate), cvPointTo32f(param->shear));
+        }
 
-		if (key == '-') {
-			param->scale_factor *= 0.95;
+        if (key == '-') {
+            param->scale_factor *= 0.95;
 
-			cvReleaseImage(&param->img_display);
-			param->img_display = cvCreateImage(
-				cvSize(param->img_src->width * param->scale_factor, param->img_src->height * param->scale_factor),
-				param->img_src->depth, param->img_src->nChannels);
-			cvResize(param->img_src, param->img_display);
-			cvShowImageAndRectangle(param->w_name, param->img_display, cvRect32fFromRect(param->rect, param->rotate), cvPointTo32f(param->shear));
-		}
+            cout<<"Scale factorchanged to "<<param->scale_factor<<endl;
+            cvReleaseImage(&param->img_display);
+            param->img_display = cvCreateImage(
+                        cvSize(param->img_src->width * param->scale_factor, param->img_src->height * param->scale_factor),
+                        param->img_src->depth, param->img_src->nChannels);
+            cvResize(param->img_src, param->img_display);
+            cvShowImageAndRectangle(param->w_name, param->img_display, cvRect32fFromRect(param->rect, param->rotate), cvPointTo32f(param->shear));
+        }
 
 
         // 32 is SPACE
@@ -317,12 +352,22 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
         {
             if( param->rect.width > 0 && param->rect.height > 0 )
             {
-                string output_path = icFormat( 
-                    param->output_format, fs::dirname( filename ),
-                    fs::filename( filename ), fs::extension( filename ),
-                    param->rect.x, param->rect.y, param->rect.width, param->rect.height, 
-                    param->frame, param->rotate );
-
+                string output_path;
+                if(param->scale_factor!=1.0f){
+                    output_path= icFormat(
+                                param->output_format, fs::dirname( filename ),
+                                fs::filename( filename ), fs::extension( filename ),
+                                param->rect.x*(1/param->scale_factor), param->rect.y*(1/param->scale_factor), param->rect.width*(1/param->scale_factor), param->rect.height*(1/param->scale_factor),
+                                param->frame, param->rotate );
+                    cout<<"Scale factor is "<<param->scale_factor<<", Scaled Rect is "<<param->rect.x*(1/param->scale_factor)<<", "<<param->rect.y*(1/param->scale_factor)<<", "<<param->rect.width*(1/param->scale_factor)<<", "<<param->rect.height*(1/param->scale_factor)<<endl;
+                }else{
+                    output_path = icFormat(
+                                param->output_format, fs::dirname( filename ),
+                                fs::filename( filename ), fs::extension( filename ),
+                                param->rect.x, param->rect.y, param->rect.width, param->rect.height,
+                                param->frame, param->rotate );
+                    cout<<"Scale factor is "<<param->scale_factor<<", Unscaled Rect is "<<param->rect.x<<", "<<param->rect.y<<", "<<param->rect.width<<", "<<param->rect.height<<endl;
+                }
                 if( !fs::match_extensions( output_path, param->imtypes ) )
                 {
                     cerr << "The image type " << fs::extension( output_path ) << " is not supported." << endl;
@@ -330,12 +375,24 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
                 }
                 fs::create_directories( fs::dirname( output_path ) );
 
-                IplImage* crop = cvCreateImage( 
-                    cvSize( param->rect.width, param->rect.height ), 
-                    param->img_src->depth, param->img_src->nChannels );
-                cvCropImageROI( param->img_src, crop, 
-                                cvRect32fFromRect( param->rect, param->rotate ), 
-                                cvPointTo32f( param->shear ) );
+                IplImage* crop;
+                if(param->scale_factor!=1.0f){
+                    crop = cvCreateImage(
+                                cvSize( param->rect.width*(1/param->scale_factor), param->rect.height*(1/param->scale_factor) ),
+                                param->img_src->depth, param->img_src->nChannels );
+                    cvCropImageROI( param->img_src, crop,
+                                    cvRect32f( param->rect.x*(1/param->scale_factor), param->rect.y*(1/param->scale_factor), param->rect.width*(1/param->scale_factor), param->rect.height*(1/param->scale_factor), param->rotate ),
+                                    cvPointTo32f( param->shear ) );
+                    cout<<"Scale factor is "<<param->scale_factor<<", Scaled crop image size is "<<param->rect.x*(1/param->scale_factor)<<", "<<param->rect.y*(1/param->scale_factor)<<", "<<param->rect.width*(1/param->scale_factor)<<", "<<param->rect.height*(1/param->scale_factor)<<endl;
+                }else{
+                    crop = cvCreateImage(
+                                cvSize( param->rect.width, param->rect.height ),
+                                param->img_src->depth, param->img_src->nChannels );
+                    cvCropImageROI( param->img_src, crop,
+                                    cvRect32fFromRect( param->rect, param->rotate ),
+                                    cvPointTo32f( param->shear ) );
+                    cout<<"Scale factor is "<<param->scale_factor<<", Unscaled crop image size is "<<param->rect.x<<", "<<param->rect.y<<", "<<param->rect.width<<", "<<param->rect.height<<endl;
+                }
                 cvSaveImage( fs::realpath( output_path ).c_str(), crop );
                 cout << fs::realpath( output_path ) << endl;
                 cvReleaseImage( &crop );
@@ -348,9 +405,9 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
             {
                 IplImage* tmpimg = cvQueryFrame( param->cap );
                 if( tmpimg != NULL )
-                //if( frame < cvGetCaptureProperty( param->cap, CV_CAP_PROP_FRAME_COUNT ) )
+                    //if( frame < cvGetCaptureProperty( param->cap, CV_CAP_PROP_FRAME_COUNT ) )
                 {
-                    param->img_src = tmpimg; 
+                    param->img_src = tmpimg;
                     {
                         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
                         while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
@@ -378,11 +435,14 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
                     filename = *param->fileiter;
                     param->img_src = cvLoadImage( fs::realpath( filename ).c_str() );
                     {
+                        param->scale_factor=1.0f;
                         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
-                        while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
                             _size.width /= 2;
                             _size.height /= 2;
                             param->scale_factor /= 2;
+                        }else{
+                            param->scale_factor=1.0f;
                         }
                         param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
                         cvResize(param->img_src, param->img_display);
@@ -404,10 +464,12 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
                     param->img_src = tmpimg;
                     {
                         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
-                        while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
                             _size.width /= 2;
                             _size.height /= 2;
                             param->scale_factor /= 2;
+                        }else{
+                            param->scale_factor=1.0f;
                         }
                         param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
                         cvResize(param->img_src, param->img_display);
@@ -421,13 +483,14 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
             }
             else
             {
-                if( param->fileiter != param->filelist.begin() ) 
+                if( param->fileiter != param->filelist.begin() )
                 {
                     cvReleaseImage( &param->img_src );
                     param->fileiter--;
                     filename = *param->fileiter;
                     param->img_src = cvLoadImage( fs::realpath( filename ).c_str() );
                     {
+                        param->scale_factor=1.0f;
                         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
                         while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
                             _size.width /= 2;
@@ -533,8 +596,8 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
             if( param->img_src )
             {
                 param->rect = cvShowImageAndWatershed( param->w_name, param->img_display, param->circle );
-                cvShowCroppedImage( param->miniw_name, param->img_src, 
-                                    cvRect32fFromRect( param->rect, param->rotate ), 
+                cvShowCroppedImage( param->miniw_name, param->img_src,
+                                    cvRect32fFromRect( param->rect, param->rotate ),
                                     cvPointTo32f( param->shear ) );
             }
         }
@@ -619,7 +682,7 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
             /*
               if( key == 'e' || key == 'E' ) // Expansion and Shrink so that ratio does not change
               {
-              if( param->rect.height != 0 && param->rect.width != 0 ) 
+              if( param->rect.height != 0 && param->rect.width != 0 )
               {
               int gcd, a = param->rect.width, b = param->rect.height;
               while( 1 )
@@ -637,9 +700,9 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
               {
               cout << ratio_width << ":" << ratio_height << " * " << gcd << endl;
               param->rect.width = ratio_width * gcd;
-              param->rect.height = ratio_height * gcd; 
-              cvShowImageAndRectangle( param->w_name, param->img, 
-              cvRect32fFromRect( param->rect, param->rotate ), 
+              param->rect.height = ratio_height * gcd;
+              cvShowImageAndRectangle( param->w_name, param->img,
+              cvRect32fFromRect( param->rect, param->rotate ),
               cvPointTo32f( param->shear ) );
               }
               }
@@ -647,11 +710,11 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
 
             if( param->img_src )
             {
-                cvShowImageAndRectangle( param->w_name, param->img_display, 
-                                         cvRect32fFromRect( param->rect, param->rotate ), 
+                cvShowImageAndRectangle( param->w_name, param->img_display,
+                                         cvRect32fFromRect( param->rect, param->rotate ),
                                          cvPointTo32f( param->shear ) );
-                cvShowCroppedImage( param->miniw_name, param->img_src, 
-                                    cvRect32fFromRect( param->rect, param->rotate ), 
+                cvShowCroppedImage( param->miniw_name, param->img_src,
+                                    cvRect32fFromRect( param->rect, param->rotate ),
                                     cvPointTo32f( param->shear ) );
             }
         }
@@ -680,14 +743,14 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
     if( y >= 32768 ) y -= 65536; // change top outside to negative
 
     // MBUTTON or LBUTTON + SHIFT is to draw wathershed
-    if( event == CV_EVENT_MBUTTONDOWN || 
-        ( event == CV_EVENT_LBUTTONDOWN && flags & CV_EVENT_FLAG_SHIFTKEY ) ) // initialization
+    if( event == CV_EVENT_MBUTTONDOWN ||
+            ( event == CV_EVENT_LBUTTONDOWN && flags & CV_EVENT_FLAG_SHIFTKEY ) ) // initialization
     {
         param->circle.x = x;
         param->circle.y = y;
     }
     else if( event == CV_EVENT_MOUSEMOVE && flags & CV_EVENT_FLAG_MBUTTON ||
-        ( event == CV_EVENT_MOUSEMOVE && flags & CV_EVENT_FLAG_LBUTTON && flags & CV_EVENT_FLAG_SHIFTKEY ) )
+             ( event == CV_EVENT_MOUSEMOVE && flags & CV_EVENT_FLAG_LBUTTON && flags & CV_EVENT_FLAG_SHIFTKEY ) )
     {
         param->watershed = true;
         param->rotate  = 0;
@@ -695,8 +758,8 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
 
         param->circle.width = (int) cvPointNorm( cvPoint( param->circle.x, param->circle.y ), cvPoint( x, y ) );
         param->rect = cvShowImageAndWatershed( param->w_name, param->img_display, param->circle );
-        cvShowCroppedImage( param->miniw_name, param->img_src, 
-                            cvRect32fFromRect( param->rect, param->rotate ), 
+        cvShowCroppedImage( param->miniw_name, param->img_src,
+                            cvRect32fFromRect( param->rect, param->rotate ),
                             cvPointTo32f( param->shear ) );
     }
 
@@ -716,12 +779,18 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
         param->rect.width =  abs( point0.x - x );
         param->rect.height = abs( point0.y - y );
 
-        cvShowImageAndRectangle( param->w_name, param->img_display, 
-                                 cvRect32fFromRect( param->rect, param->rotate ), 
-                                 cvPointTo32f( param->shear ) );
-        cvShowCroppedImage( param->miniw_name, param->img_src, 
-                            cvRect32fFromRect( param->rect, param->rotate ), 
+        cvShowImageAndRectangle( param->w_name, param->img_display,
+                                         cvRect32fFromRect( param->rect, param->rotate ),
+                                         cvPointTo32f( param->shear ) );
+        cvShowCroppedImage( param->miniw_name, param->img_src,
+                            cvRect32f( param->rect.x*(1/param->scale_factor), param->rect.y*(1/param->scale_factor), param->rect.width*(1/param->scale_factor), param->rect.height*(1/param->scale_factor), param->rotate ),
                             cvPointTo32f( param->shear ) );
+//        cvShowImageAndRectangle( param->w_name, param->img_display,
+//                                 cvRect32fFromRect( param->rect, param->rotate ),
+//                                 cvPointTo32f( param->shear ) );
+//        cvShowCroppedImage( param->miniw_name, param->img_src,
+//                            cvRect32fFromRect( param->rect, param->rotate ),
+//                            cvPointTo32f( param->shear ) );
     }
 
     // RBUTTON to move rentangle or watershed marker
@@ -746,14 +815,14 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
         {
             param->watershed = false;
 
-            if( ( param->rect.x < x && x < param->rect.x + param->rect.width ) && 
-                ( param->rect.y < y && y < param->rect.y + param->rect.height ) )
+            if( ( param->rect.x < x && x < param->rect.x + param->rect.width ) &&
+                    ( param->rect.y < y && y < param->rect.y + param->rect.height ) )
             {
                 move_rect = true;
             }
             if( x <= param->rect.x )
             {
-                resize_rect_left = true; 
+                resize_rect_left = true;
             }
             else if( x >= param->rect.x + param->rect.width )
             {
@@ -761,7 +830,7 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
             }
             if( y <= param->rect.y )
             {
-                resize_rect_top = true; 
+                resize_rect_top = true;
             }
             else if( y >= param->rect.y + param->rect.height )
             {
@@ -778,7 +847,7 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
             param->circle.y += move.y;
 
             param->rect = cvShowImageAndWatershed( param->w_name, param->img_display, param->circle );
-            cvShowCroppedImage( param->miniw_name, param->img_src, 
+            cvShowCroppedImage( param->miniw_name, param->img_src,
                                 cvRect32fFromRect( param->rect, param->rotate ),
                                 cvPointTo32f( param->shear ) );
 
@@ -788,8 +857,8 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
         {
             param->circle.width = (int) cvPointNorm( cvPoint( param->circle.x, param->circle.y ), cvPoint( x, y ) );
             param->rect = cvShowImageAndWatershed( param->w_name, param->img_display, param->circle );
-            cvShowCroppedImage( param->miniw_name, param->img_src, 
-                                cvRect32fFromRect( param->rect, param->rotate ), 
+            cvShowCroppedImage( param->miniw_name, param->img_src,
+                                cvRect32fFromRect( param->rect, param->rotate ),
                                 cvPointTo32f( param->shear ) );
         }
     }
@@ -843,11 +912,11 @@ void mouse_callback( int event, int x, int y, int flags, void* _param )
             resize_rect_bottom = tmp;
         }
 
-        cvShowImageAndRectangle( param->w_name, param->img_display, 
-                                 cvRect32fFromRect( param->rect, param->rotate ), 
+        cvShowImageAndRectangle( param->w_name, param->img_display,
+                                 cvRect32fFromRect( param->rect, param->rotate ),
                                  cvPointTo32f( param->shear ) );
-        cvShowCroppedImage( param->miniw_name, param->img_src, 
-                            cvRect32fFromRect( param->rect, param->rotate ), 
+        cvShowCroppedImage( param->miniw_name, param->img_src,
+                            cvRect32fFromRect( param->rect, param->rotate ),
                             cvPointTo32f( param->shear ) );
         point0 = cvPoint( x, y );
     }
@@ -877,7 +946,7 @@ void arg_parse( int argc, char** argv, ArgParam *arg )
         {
             usage( arg );
             return;
-        } 
+        }
         else if( !strcmp( argv[i], "-o" ) || !strcmp( argv[i], "--output_format" ) )
         {
             arg->output_format = argv[++i];
