@@ -213,8 +213,8 @@ void load_reference( const ArgParam* arg, CvCallbackParam* param )
             }
         }
         cerr << "Done!" << endl;
-        cerr << "Now showing " << fs::realpath( *param->fileiter ) << endl;
         param->img_src = cvLoadImage( fs::realpath( *param->fileiter ).c_str() );
+        cerr << "Now showing " << fs::realpath( *param->fileiter ) << " | width:" << param->img_src->width << ", height:" << param->img_src->height << endl;
     }
     else if( is_video )
     {
@@ -254,17 +254,29 @@ void load_reference( const ArgParam* arg, CvCallbackParam* param )
     param->screen_size.width = GetSystemMetrics(SM_CXSCREEN);
     param->screen_size.height = GetSystemMetrics(SM_CYSCREEN);
 #else
-    param->screen_size.width = 1366;
-    param->screen_size.height = 768;
+    param->screen_size.width = 1400;
+    param->screen_size.height = 800;
 #endif // WIN32
 
     // resize image to fit screen resolution
     {
         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
-        while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
             _size.width /= 2;
             _size.height /= 2;
             param->scale_factor /= 2;
+            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                _size.width /= 2;
+                _size.height /= 2;
+                param->scale_factor /= 2;
+            }
+            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                _size.width /= 2;
+                _size.height /= 2;
+                param->scale_factor /= 2;
+            }
+        }else{
+            param->scale_factor=1.0f;
         }
         param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
         cvResize(param->img_src, param->img_display);
@@ -284,6 +296,16 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
         _size.width /= 2;
         _size.height /= 2;
         param->scale_factor /= 2;
+        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+            _size.width /= 2;
+            _size.height /= 2;
+            param->scale_factor /= 2;
+        }
+        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+            _size.width /= 2;
+            _size.height /= 2;
+            param->scale_factor /= 2;
+        }
     }else{
         param->scale_factor=1.0f;
     }
@@ -441,13 +463,23 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
                             _size.width /= 2;
                             _size.height /= 2;
                             param->scale_factor /= 2;
+                            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                                _size.width /= 2;
+                                _size.height /= 2;
+                                param->scale_factor /= 2;
+                            }
+                            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                                _size.width /= 2;
+                                _size.height /= 2;
+                                param->scale_factor /= 2;
+                            }
                         }else{
                             param->scale_factor=1.0f;
                         }
                         param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
                         cvResize(param->img_src, param->img_display);
                     }
-                    cout << "Now showing " << fs::realpath( filename ) << endl;
+                    cout << "Now showing " << fs::realpath( filename ) << " | width:" << param->img_src->width <<", height:" << param->img_src->height << endl;
                 }
             }
         }
@@ -492,15 +524,27 @@ void key_callback( const ArgParam* arg, CvCallbackParam* param )
                     {
                         param->scale_factor=1.0f;
                         CvSize _size = cvSize(param->img_src->width, param->img_src->height);
-                        while (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                        if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
                             _size.width /= 2;
                             _size.height /= 2;
                             param->scale_factor /= 2;
+                            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                                _size.width /= 2;
+                                _size.height /= 2;
+                                param->scale_factor /= 2;
+                            }
+                            if (_size.width > param->screen_size.width || _size.height > param->screen_size.height) {
+                                _size.width /= 2;
+                                _size.height /= 2;
+                                param->scale_factor /= 2;
+                            }
+                        }else{
+                            param->scale_factor=1.0f;
                         }
                         param->img_display = cvCreateImage(_size, param->img_src->depth, param->img_src->nChannels);
                         cvResize(param->img_src, param->img_display);
                     }
-                    cout << "Now showing " << fs::realpath( filename ) << endl;
+                    cout << "Now showing " << fs::realpath( filename ) << " | width:" << param->img_src->width <<", height:" << param->img_src->height << endl;
                 }
             }
         }
